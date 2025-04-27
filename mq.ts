@@ -78,14 +78,16 @@ export function filterOrAck<T>(filterByMessageData: (data: T) => boolean) {
 
 export type ErrorHandler = <T>(error: Error, message: SubscriberMessage<T>) => void;
 
-export function attemptData<T>(schema: Record<string, Joi.AnySchema>, onError: ErrorHandler) {
+export function attemptData<T>(schema: Record<string, Joi.AnySchema>, onError?: ErrorHandler) {
     return filter<SubscriberMessage<T>>(function (message) {
         try {
             message.data = Joi.attempt(message.data, Joi.object(schema), { allowUnknown: true });
             return true;
         } catch (error) {
             message.ackMessage();
-            onError(error, message);
+            if (onError) {
+                onError(error, message);
+            }
             return false;
         }
     });

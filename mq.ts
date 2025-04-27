@@ -17,6 +17,8 @@ export interface SubscriberMessage<T> {
     ackMessage: () => void;
 }
 
+export type ErrorHandler = <T>(error: Error, message: SubscriberMessage<T>) => void;
+
 export async function connect(onConnected: (init: RabbitMqInitializer) => Promise<void>) {
     const connection = await amqp.connect(env.MQ_HOST);
     const publisher = await connection.createChannel();
@@ -75,8 +77,6 @@ export function filterOrAck<T>(filterByMessageData: (data: T) => boolean) {
         filterByMessageData(message.data)? true : (message.ackMessage(), false)
     );
 }
-
-export type ErrorHandler = <T>(error: Error, message: SubscriberMessage<T>) => void;
 
 export function attemptData<T>(schema: Record<string, Joi.AnySchema>, onError?: ErrorHandler) {
     return filter<SubscriberMessage<T>>(function (message) {

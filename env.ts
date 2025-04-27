@@ -5,6 +5,7 @@ import Joi from "joi";
 interface SystemFields {
     NODE_ENV: "development" | "production" | "test";
     NODE_TIMEZONE: "Asia/Hong_Kong" | string;
+    NODE_SCHEMA_EXCLUDES?: string;
 }
 
 interface LoggerFields {
@@ -80,17 +81,29 @@ const mqSchema = {
     MQ_HOST: Joi.string().required(),
 }
 
-const customFields = {}
+const customSchema = {
 
-const schema = Joi.object<Fields>({
-    ...systemSchema,
-    ...loggerSchema,
-    ...serverSchema,
-    ...dbSchema,
-    ...jwtSchema,
-    ...mqSchema,
-    ...customFields,
-});
+}
+
+const NODE_SCHEMA_EXCLUDES = Joi.attempt(process.env.NODE_ENV_EXCLUDES, Joi.string().default(""));
+
+const schemas = new Map<string, Record<string, Joi.AnySchema>>();
+schemas.set("systemSchema", systemSchema);
+schemas.set("loggerSchema", loggerSchema);
+schemas.set("serverSchema", serverSchema);
+schemas.set("dbSchema", dbSchema);
+schemas.set("jwtSchema", jwtSchema);
+schemas.set("mqSchema", mqSchema);
+schemas.set("customSchema", customSchema);
+
+NODE_SCHEMA_EXCLUDES.split(",").forEach(s => schemas.delete(s));
+
+
+const schema = Joi.object<Fields>(
+    schemas
+        .values()
+        .reduce((prev, curr) => ({ ...prev, ...curr }), {})
+);
 
 const env = Joi.attempt(process.env, schema, {
     allowUnknown: true,

@@ -8,7 +8,7 @@ interface RabbitMqInitializer {
     assertQueue(exchange: string, routingKey: string, queue: string): Promise<void>;
 }
 
-interface SubscriberMessage<T> {
+export interface SubscriberMessage<T> {
     exchange: string;
     routingKey: string;
     queue: string;

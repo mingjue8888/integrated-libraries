@@ -2,7 +2,7 @@ import winston from "winston";
 import TransportStream from "winston-transport";
 import stripAnsi from "strip-ansi";
 import axios from "axios";
-import datetime from "./datetime";
+import date from "./date";
 import env from "./env";
 
 const levels = {
@@ -24,7 +24,7 @@ const colors = {
 winston.addColors(colors);
 
 const format = winston.format.combine(
-    winston.format.timestamp({ format: () => datetime().tz().format("YYYY-MM-DD HH:mm:ss.SSS") }),
+    winston.format.timestamp({ format: () => date().tz().format("YYYY-MM-DD HH:mm:ss.SSS") }),
     winston.format.colorize({ all: true }),
     winston.format.align(),
     winston.format.printf(info => `${info.timestamp} ${info.level}: ${info.message?.toString()}`)

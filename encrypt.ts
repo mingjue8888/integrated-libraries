@@ -1,4 +1,4 @@
-import datetime from "./datetime";
+import datetime from "./date";
 import env from "./env";
 import {JwtPayload, sign, verify} from "jsonwebtoken";
 import {compareSync, genSaltSync, hashSync} from "bcrypt";

@@ -69,7 +69,20 @@ export async function connect(onConnected: (init: RabbitMqInitializer) => Promis
         return message$;
     }
 
-    return { publish, consume };
+    const errorHandlers = {
+        reply(): ErrorHandler {
+            return function (_error, message) {
+                publish(message.exchange, message.routingKey, message.sourceData);
+            }
+        },
+        forward(exchange: string, routingKey: string): ErrorHandler {
+            return function (_error, message) {
+                publish(exchange, routingKey, message.sourceData);
+            }
+        },
+    }
+
+    return { publish, consume, errorHandlers };
 }
 
 export function filterOrAck<T>(filterByMessageData: (data: T) => boolean) {
@@ -78,15 +91,15 @@ export function filterOrAck<T>(filterByMessageData: (data: T) => boolean) {
     );
 }
 
-export function attemptData<T>(schema: Record<string, Joi.AnySchema>, onError?: ErrorHandler) {
+export function attemptData<T>(schema: Record<string, Joi.AnySchema>, errorHandler?: ErrorHandler) {
     return filter<SubscriberMessage<T>>(function (message) {
         try {
             message.data = Joi.attempt(message.data, Joi.object(schema), { allowUnknown: true });
             return true;
         } catch (error) {
             message.ackMessage();
-            if (onError) {
-                onError(error, message);
+            if (errorHandler) {
+                errorHandler(error, message);
             }
             return false;
         }

@@ -8,16 +8,19 @@ interface RabbitMqInitializer {
     assertQueue(exchange: string, routingKey: string, queue: string): Promise<void>;
 }
 
-export interface SubscriberMessage<T extends object> {
+export interface AbstractConsumeMessage<T extends object> {
     exchange: string;
     routingKey: string;
     sourceData: object;
     data: T;
     ackMessage: () => void;
+}
+
+export interface ConsumeMessage<T extends object> extends AbstractConsumeMessage<T> {
     throwError: (err: Error) => void;
 }
 
-export interface ErrMessage<T extends object> extends SubscriberMessage<T> {
+export interface ErrMessage<T extends object> extends AbstractConsumeMessage<T> {
     errMessage: string;
     errType: string;
     sourceExchange: string;
@@ -48,7 +51,7 @@ export async function connect(onConnected: (init: RabbitMqInitializer) => Promis
     }
 
     function consume<T extends object>(queue: string, prefetch: number = 200) {
-        const message$ = new Subject<SubscriberMessage<T>>();
+        const message$ = new Subject<ConsumeMessage<T>>();
 
         !async function () {
             const listener = await connection.createChannel();
@@ -113,7 +116,7 @@ export async function connect(onConnected: (init: RabbitMqInitializer) => Promis
 }
 
 export function assertData<T extends object>(schema: Record<string, Joi.AnySchema>) {
-    return filter<SubscriberMessage<T>>(function (message) {
+    return filter<ConsumeMessage<T>>(function (message) {
         try {
             message.data = Joi.attempt(message.data, Joi.object(schema), { allowUnknown: true });
             return true;
@@ -126,7 +129,7 @@ export function assertData<T extends object>(schema: Record<string, Joi.AnySchem
 }
 
 export function filterOrAck<T extends object>(filterByMessageData: (data: T) => boolean) {
-    return filter<SubscriberMessage<T>>((message) =>
+    return filter<ConsumeMessage<T>>((message) =>
         filterByMessageData(message.data)? true : (message.ackMessage(), false)
     );
 }

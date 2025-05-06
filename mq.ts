@@ -104,7 +104,7 @@ export async function connect(onConnected: (init: RabbitMqInitializer) => Promis
                 errMessage.data = errMessage.sourceData as T;
                 errMessage.ackMessage = () => listener.ack(message);
                 errMessage.replyData = (priority?: number) =>
-                    publish(errMessage.sourceExchange, errMessage.sourceRoutingKey, errMessage.data as object, priority);
+                    publish(errMessage.sourceExchange, errMessage.sourceRoutingKey, errMessage.data, priority);
                 errMessage$.next(errMessage);
             });
         }();

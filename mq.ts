@@ -25,7 +25,7 @@ export interface ErrMessage<T extends object> extends AbstractConsumeMessage<T> 
     errType: string;
     sourceExchange: string;
     sourceRoutingKey: string;
-    replyData: () => void;
+    replyData: (priority?: number) => void;
 }
 
 export async function connect(onConnected: (init: RabbitMqInitializer) => Promise<void>) {
@@ -103,8 +103,8 @@ export async function connect(onConnected: (init: RabbitMqInitializer) => Promis
                 errMessage.routingKey = message.fields.routingKey;
                 errMessage.data = errMessage.sourceData as T;
                 errMessage.ackMessage = () => listener.ack(message);
-                errMessage.replyData = () =>
-                    publish(errMessage.sourceExchange, errMessage.sourceRoutingKey, errMessage.data as object, 10);
+                errMessage.replyData = (priority?: number) =>
+                    publish(errMessage.sourceExchange, errMessage.sourceRoutingKey, errMessage.data as object, priority);
                 errMessage$.next(errMessage);
             });
         }();

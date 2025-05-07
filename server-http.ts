@@ -168,7 +168,7 @@ export function validResponseAndSend(schema: Record<string, Joi.AnySchema>): Mid
     });
 }
 
-export function dataInitialize(request: Request, response: Response, next: NextFunction) {
+export function dataInitializer(request: Request, response: Response, next: NextFunction) {
     Reflect.set(request, "data", {});
     Reflect.set(response, "data", undefined);
     next();
@@ -222,7 +222,7 @@ export function startup(routers: ExpressRouter[], options?: StartupOptions) {
         .use(urlencoded({ extended: true }))
         .use(json())
         .use(passport.initialize())
-        .use(dataInitialize);
+        .use(dataInitializer);
 
     options?.expandMiddlewares?.forEach(middleware => app.use(middleware));
 

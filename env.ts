@@ -88,13 +88,13 @@ const customSchema = {
 const NODE_SCHEMA_EXCLUDES = Joi.attempt(process.env.NODE_ENV_EXCLUDES, Joi.string().default(""));
 
 const schemas = new Map<string, Record<string, Joi.AnySchema>>();
-schemas.set("systemSchema", systemSchema);
-schemas.set("loggerSchema", loggerSchema);
-schemas.set("serverSchema", serverSchema);
-schemas.set("dbSchema", dbSchema);
-schemas.set("jwtSchema", jwtSchema);
-schemas.set("mqSchema", mqSchema);
-schemas.set("customSchema", customSchema);
+schemas.set("system", systemSchema);
+schemas.set("logger", loggerSchema);
+schemas.set("server", serverSchema);
+schemas.set("db", dbSchema);
+schemas.set("jwt", jwtSchema);
+schemas.set("mq", mqSchema);
+schemas.set("custom", customSchema);
 
 NODE_SCHEMA_EXCLUDES.split(",").forEach(s => schemas.delete(s));
 

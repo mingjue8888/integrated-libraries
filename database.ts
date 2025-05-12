@@ -30,5 +30,5 @@ export async function safeTransaction(handler: TransactionHandler) {
     const transaction = await database.transaction();
     await handler(transaction)
         .then(() => transaction.commit())
-        .catch(error => (transaction.rollback(), error));
+        .catch(error => transaction.rollback().then(() => error));
 }

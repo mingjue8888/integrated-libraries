@@ -21,6 +21,8 @@ declare global {
 
 interface WebsiteStartupOptions extends StartupOptions {
     apiPrefix?: string;
+    viewsPath?: string;
+    staticFolder?: string;
 }
 
 export function startWebsite(routers: ExpressRouter[], options?: WebsiteStartupOptions) {
@@ -34,8 +36,8 @@ export function startWebsite(routers: ExpressRouter[], options?: WebsiteStartupO
         preSetting(app) {
             app.engine("handlebars", engine());
             app.set("view engine", "handlebars");
-            app.set("views", "./views");
-            app.use(express.static("public"));
+            app.set("views", options?.viewsPath || "./views");
+            app.use(express.static(options?.staticFolder || "public"));
         },
         rewriteExceptionHandler(error: Error, response: Response) {
             if (options?.apiPrefix) {

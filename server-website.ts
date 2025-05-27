@@ -64,7 +64,7 @@ export function startWebsite(routers: ExpressRouter[], options?: WebsiteStartupO
     });
 }
 
-export function toView(view: string, layout?: string): Middleware {
+export function render(view: string, layout?: string): Middleware {
     return asyncMiddleware(async function (request, response) {
         response.render(view, { user: request.user, layout });
     });
@@ -73,7 +73,7 @@ export function toView(view: string, layout?: string): Middleware {
 export function validRender(schema: Record<string, Joi.AnySchema>): Middleware {
     return asyncMiddleware(async function (request, response) {
         try {
-            response.data = Joi.attempt(response.data, Joi.object(schema));
+            response.data = Joi.attempt(response.data, Joi.object(schema), { allowUnknown: true });
             response.view = Joi.attempt(response.view, Joi.string().required());
             response.layout = Joi.attempt(response.layout, Joi.string());
             response.render(response.view, { user: request.user, data: response.data, layout: response.layout });
